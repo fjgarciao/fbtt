@@ -1,0 +1,16 @@
+allprojects {
+    apply plugin: 'idea'
+    apply plugin: 'eclipse'
+
+    idea {
+        module {
+            excludeDirs += file('.idea')
+            excludeDirs += file('.settings')
+            excludeDirs += file('logs')
+            excludeDirs += file('bin')
+            excludeDirs += file('build')
+
+            downloadSources = true
+        }
+    }
+}
