@@ -16,6 +16,6 @@ public class WelcomeController {
     @RequestMapping(method = RequestMethod.GET)
     public String index() {
         LOGGER.debug("index() is executed!");
-        return "index";
+        return "redirect:/calendar";
     }
 }

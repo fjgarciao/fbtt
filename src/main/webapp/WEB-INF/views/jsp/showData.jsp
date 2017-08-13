@@ -20,17 +20,8 @@
 
 <body>
 
-    <form:form method="POST" action="/calendar/show">
-        <form:select path="marketing_day">
-            <form:option value="" label="--- Select ---"/>
-            <c:forEach items="${marketingDays}" var="marketingDay">
-                <form:option value="${marketingDay.name}" label="${marketingDay.name}"/>
-            </c:forEach>
-            <%--
-            <form:options items="${marketingDays}" />
-            --%>
-        </form:select>
-    </form:form>
+    <c:out value="${createCampaignsQuery}"/>
+
 </body>
 
 </html>
