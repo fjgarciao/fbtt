@@ -1,7 +1,7 @@
 package com.fjgarciao.fbtt.controller;
 
 import com.fjgarciao.fbtt.dto.SelectMarketingDayQuery;
-import com.fjgarciao.fbtt.dto.CreateCampaignsQuery;
+import com.fjgarciao.fbtt.dto.CountrySelectionQuery;
 import com.fjgarciao.fbtt.helper.MarketingCalendar;
 import com.fjgarciao.fbtt.helper.MarketingDay;
 import com.fjgarciao.fbtt.helper.MarketingDayFactory;
@@ -49,7 +49,7 @@ public class MarketingCalendarController {
 
     @RequestMapping(value = "/selectCountries", method = RequestMethod.POST)
     public String selectCountries(@Valid SelectMarketingDayQuery selectMarketingDayQuery,
-                                  @ModelAttribute("createCampaignsQuery") CreateCampaignsQuery createCampaignsQuery,
+                                  @ModelAttribute("createCampaignsQuery") CountrySelectionQuery createCampaignsQuery,
                                   BindingResult result,
                                   ModelMap model) {
         LOGGER.debug("MarketingCalendarController.selectCountries. Query: {}", selectMarketingDayQuery);
@@ -62,15 +62,15 @@ public class MarketingCalendarController {
     }
 
     @RequestMapping(value = "/createCampaigns", method = RequestMethod.POST)
-    public String createCampaigns(@Valid CreateCampaignsQuery createCampaignsQuery, BindingResult result, ModelMap model) {
-        LOGGER.debug("MarketingCalendarController.createCampaigns. Query: {}", createCampaignsQuery);
+    public String createCampaigns(@Valid CountrySelectionQuery countrySelectionQuery, BindingResult result, ModelMap model) {
+        LOGGER.debug("MarketingCalendarController.createCampaigns. Query: {}", countrySelectionQuery);
 
         /*
-        MarketingDay marketingDay = marketingDayFactory.getMarketingDayByName(createCampaignsQuery.getMarketingDay()).get();
+        MarketingDay marketingDay = marketingDayFactory.getMarketingDayByName(countrySelectionQuery.getMarketingDay()).get();
         Map<CountryCode, Date> calendarData = marketingCalendar.getValuesFromMarketingDay(marketingDay, 2017);
         model.addAttribute("calendarData", calendarData);
         */
-        model.addAttribute("createCampaignsQuery", createCampaignsQuery);
+        model.addAttribute("countrySelectionQuery", countrySelectionQuery);
         return "showData";
     }
 }
