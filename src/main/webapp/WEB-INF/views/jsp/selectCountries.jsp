@@ -21,39 +21,61 @@
 <body>
 
     <form:form method="POST" action="/calendar/createCampaigns" modelAttribute="createCampaignsQuery">
-        <form:label path="countries">
-            <spring:message code="calendar.countries"/>:
-        </form:label>
-        <form:select path="countries" multiple="true" size="10">
-            <c:forEach items="${calendarData}" var="entry">
-                <form:option value="${entry.key.alpha2}" label="${entry.key.name} - ${entry.value}"/>
-            </c:forEach>
-        </form:select>
-        <br/>
+        <form:errors path="*" cssClass="errorblock" element="div" />
 
-        <form:label path="startOffsetR">
-            <spring:message code="calendar.startOffset"/>:
-        </form:label>
-        <form:radiobutton path="startOffsetR" value="0"/><spring:message code="calendar.startOffset.before"/>:
-        <form:radiobutton path="startOffsetR" value="1"/><spring:message code="calendar.startOffset.after"/>:
-        <form:label path="startOffsetDays">
-            <spring:message code="calendar.startOffset.days"/>:
-        </form:label>
-        <form:input path="startOffsetDays" size="3" value="0"/>
-        <br/>
+        <p>
+            <label>
+                <spring:message code="calendar.marketingDay"/>:
+            </label>
+            <input value="<c:out value="${selectMarketingDayQuery.marketingDay}"/>" size="20" readonly/>
 
-        <form:label path="endOffsetR">
-            <spring:message code="calendar.endOffset"/>:
-        </form:label>
-        <form:radiobutton path="endOffsetR" value="0"/><spring:message code="calendar.endOffset.before"/>:
-        <form:radiobutton path="endOffsetR" value="1"/><spring:message code="calendar.endOffset.after"/>:
-        <form:label path="endOffsetDays">
-            <spring:message code="calendar.endOffset.days"/>:
-        </form:label>
-        <form:input path="endOffsetDays" size="3" value="0"/>
-        <br/>
+            <label>
+                <spring:message code="calendar.year"/>:
+            </label>
+            <input value="<c:out value="${selectMarketingDayQuery.year}"/>" size="4" readonly/>
+        </p>
 
-        <input type="submit" name="submit" class="button" value="<spring:message code="calendar.createCampaigns"/>" />
+        <p>
+            <label>
+                <spring:message code="calendar.chooseCountries"/>:
+            </label>
+        </p>
+        <p>
+            <form:label path="countries">
+                <spring:message code="calendar.countries"/>:
+            </form:label>
+            <form:select path="countries" multiple="true" size="10" cssStyle="vertical-align: middle;">
+                <c:forEach items="${countriesData}" var="entry">
+                    <fmt:formatDate value="${entry.value}" pattern="EEE, d MMM" var="date"/>
+                    <form:option value="${entry.key.alpha2}|${entry.value.time}" label="${entry.key.name} [ ${date} ]"/>
+                </c:forEach>
+            </form:select>
+            <br/>
+
+            <form:label path="startOffsetR">
+                <spring:message code="calendar.startOffset"/>:
+            </form:label>
+            <form:radiobutton path="startOffsetR" value="0"/><spring:message code="calendar.startOffset.before"/>:
+            <form:radiobutton path="startOffsetR" value="1"/><spring:message code="calendar.startOffset.after"/>:
+            <form:label path="startOffsetDays">
+                <spring:message code="calendar.startOffset.days"/>:
+            </form:label>
+            <form:input path="startOffsetDays" size="3" value="0"/>
+            <br/>
+
+            <form:label path="endOffsetR">
+                <spring:message code="calendar.endOffset"/>:
+            </form:label>
+            <form:radiobutton path="endOffsetR" value="0"/><spring:message code="calendar.endOffset.before"/>:
+            <form:radiobutton path="endOffsetR" value="1"/><spring:message code="calendar.endOffset.after"/>:
+            <form:label path="endOffsetDays">
+                <spring:message code="calendar.endOffset.days"/>:
+            </form:label>
+            <form:input path="endOffsetDays" size="3" value="0"/>
+            <br/>
+
+            <input type="submit" name="submit" class="button" value="<spring:message code="calendar.createCampaigns"/>"/>
+        </p>
     </form:form>
 
 </body>

@@ -20,17 +20,14 @@
 
 <body>
     <form:form method="POST" action="/calendar/selectCountries" modelAttribute="selectMarketingDayQuery">
-        <form:label path="calendarName">
+        <form:errors path="*" cssClass="errorblock" element="div" />
+
+        <form:label path="marketingDay">
             <spring:message code="calendar.marketingDay"/>:
         </form:label>
-        <form:select path="calendarName">
+        <form:select path="marketingDay">
             <form:option value="" label="--- Select ---"/>
             <form:options items="${marketingDays}" itemLabel="name" itemValue="name"/>
-            <%--
-            <c:forEach items="${marketingDays}" var="marketingDay">
-                <form:option value="${marketingDay.name}" label="${marketingDay.name}"/>
-            </c:forEach>
-            --%>
         </form:select>
 
         <form:label path="year">

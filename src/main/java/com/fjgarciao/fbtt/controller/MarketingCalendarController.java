@@ -54,10 +54,9 @@ public class MarketingCalendarController {
                                   ModelMap model) {
         LOGGER.debug("MarketingCalendarController.selectCountries. Query: {}", selectMarketingDayQuery);
 
-        MarketingDay marketingDay = marketingDayFactory.getMarketingDayByName(selectMarketingDayQuery.getCalendarName()).get();
-        Map<CountryCode, Date> calendarData = marketingCalendar.getValuesFromMarketingDay(marketingDay, selectMarketingDayQuery.getYear());
-        model.addAttribute("calendarData", calendarData);
-        //model.addAttribute("selectCountriesQuery", new Sele)
+        MarketingDay marketingDay = marketingDayFactory.getMarketingDayByName(selectMarketingDayQuery.getMarketingDay()).get();
+        Map<CountryCode, Date> countriesData = marketingCalendar.getValuesFromMarketingDay(marketingDay, selectMarketingDayQuery.getYear());
+        model.addAttribute("countriesData", countriesData);
 
         return "selectCountries";
     }
@@ -67,7 +66,7 @@ public class MarketingCalendarController {
         LOGGER.debug("MarketingCalendarController.createCampaigns. Query: {}", createCampaignsQuery);
 
         /*
-        MarketingDay marketingDay = marketingDayFactory.getMarketingDayByName(createCampaignsQuery.getCalendarName()).get();
+        MarketingDay marketingDay = marketingDayFactory.getMarketingDayByName(createCampaignsQuery.getMarketingDay()).get();
         Map<CountryCode, Date> calendarData = marketingCalendar.getValuesFromMarketingDay(marketingDay, 2017);
         model.addAttribute("calendarData", calendarData);
         */

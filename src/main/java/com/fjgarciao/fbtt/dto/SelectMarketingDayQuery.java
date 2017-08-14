@@ -1,12 +1,20 @@
 package com.fjgarciao.fbtt.dto;
 
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.Calendar;
 
 public class SelectMarketingDayQuery {
 
     @NotNull
-    private String calendarName;
+    @Size(min = 1)
+    private String marketingDay;
+
+    @NotNull
+    @Digits(integer = 4, fraction = 4)
+    @Min(1900)
     private int year;
 
     public SelectMarketingDayQuery() {
@@ -14,12 +22,12 @@ public class SelectMarketingDayQuery {
         this.year = c.get(Calendar.YEAR);
     }
 
-    public String getCalendarName() {
-        return calendarName;
+    public String getMarketingDay() {
+        return marketingDay;
     }
 
-    public void setCalendarName(String calendarName) {
-        this.calendarName = calendarName;
+    public void setMarketingDay(String marketingDay) {
+        this.marketingDay = marketingDay;
     }
 
     public int getYear() {
@@ -33,7 +41,7 @@ public class SelectMarketingDayQuery {
     @Override
     public String toString() {
         return "CalendarQuery{" +
-                "calendarName='" + calendarName + '\'' +
+                "marketingDay='" + marketingDay + '\'' +
                 ", year=" + year +
                 '}';
     }

@@ -1,5 +1,7 @@
 package com.fjgarciao.fbtt.dto;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
 import java.util.List;
@@ -9,8 +11,15 @@ public class CreateCampaignsQuery {
     @Size(min = 1)
     private List<String> countries = new ArrayList<>();
     private int startOffsetR;
+
+    @NotNull
+    @Min(0)
     private int startOffsetDays;
+
     private int endOffsetR;
+
+    @NotNull
+    @Min(0)
     private int endOffsetDays;
 
     public List<String> getCountries() {
