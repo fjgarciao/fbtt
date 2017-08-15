@@ -1,0 +1,14 @@
+.meta_block {
+    margin-bottom: 20px;
+}
+.meta_block .info {
+    background-color: gainsboro;
+    border: solid 1px grey;
+    font-size: medium;
+    padding: 5px;
+    margin-top: 10px;
+}
+
+.meta_block .title {
+    font-size: larger;
+}

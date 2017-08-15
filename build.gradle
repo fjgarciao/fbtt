@@ -1,0 +1,58 @@
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+}
+
+plugins {
+    id 'org.springframework.boot' version '1.5.5.RELEASE'
+    id "io.spring.dependency-management" version "1.0.3.RELEASE"
+}
+
+ext {
+    gradleExtensions = "${rootProject.projectDir}/gradle"
+
+    versions = [
+            gradle  : '4.0.1',
+            mockito : '1.10.19'
+    ]
+}
+
+apply plugin: 'java'
+apply plugin: 'war'
+
+apply from: "${gradleExtensions}/spring-boot.gradle"
+apply from: "${gradleExtensions}/ide.gradle"
+
+repositories {
+    mavenCentral()
+}
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+task wrapper(type: Wrapper) {
+    gradleVersion = versions.gradle
+}
+
+configurations.all {
+    // Check for updates every build
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+dependencies {
+    compile 'com.facebook.ads.sdk:facebook-java-ads-sdk:2.10.0'
+    compile 'com.neovisionaries:nv-i18n:1.22'
+    //compile 'com.ibm.icu:icu4j:59.1'
+    compile("javax.servlet:jstl:1.2")
+
+    testCompile("org.springframework:spring-test")
+    testCompile("org.mockito:mockito-core:${versions.mockito}") {
+        exclude group: 'org.hamcrest'
+    }
+
+    testCompile("junit:junit:4.12") {
+        exclude group: 'org.hamcrest'
+    }
+    testCompile("org.hamcrest:hamcrest-all:1.3")
+}
