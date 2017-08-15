@@ -4,6 +4,7 @@ import com.facebook.ads.sdk.*;
 import com.fjgarciao.fbtt.dto.CreateCampaignsQuery;
 import com.fjgarciao.fbtt.helper.AdSetDateCalculator;
 import com.fjgarciao.fbtt.helper.MarketingApiHelper;
+import com.fjgarciao.fbtt.util.CalendarUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +12,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class CampaignService {
@@ -42,45 +45,51 @@ public class CampaignService {
 
     public void createCalendarCampaign(CreateCampaignsQuery createCampaignsQuery) {
         APIContext apiContext = marketingApiHelper.createContext(accessToken, enableDebug);
+        AdAccount account = new AdAccount(adAccountId, apiContext);
+        final String campaignRequest = "campaignRequest";
+        final String adCreativeRequest = "adCreativeRequest";
 
         try {
+            BatchRequest batchRequest = new BatchRequest(apiContext);
+
             String campaignName = createCampaignsQuery.getCampaignName();
-            Campaign campaign = marketingApiHelper.createCampaign(apiContext, adAccountId, campaignName,
-                    "AUCTION", Campaign.EnumObjective.VALUE_BRAND_AWARENESS, Campaign.EnumStatus.VALUE_PAUSED);
+            marketingApiHelper.createCampaignBatch(batchRequest, campaignRequest, account, campaignName,
+                    "AUCTION", Campaign.EnumObjective.VALUE_PAGE_LIKES, Campaign.EnumStatus.VALUE_PAUSED);
 
-            LOGGER.debug("Campaign Created: {}", campaign);
-
-            AdCreative adCreative = marketingApiHelper.createAdCreative(apiContext, adAccountId, "Creative", pageId, "This is the title", "This is the body", "http://www.facebookmarketingdevelopers.com/static/images/resource_1.jpg");
-
-            LOGGER.debug("AdCreative Created: {}", adCreative);
+            marketingApiHelper.createAdCreativeBatch(batchRequest, adCreativeRequest, account,
+                    "Creative", pageId, "This is the title", "This is the body",
+                    "http://www.facebookmarketingdevelopers.com/static/images/resource_1.jpg");
 
             createCampaignsQuery.parseCountries().entrySet().stream().forEach(entry -> {
-                String country = entry.getKey();
-                Date date = entry.getValue();
+                final String country = entry.getKey();
+                final Date date = CalendarUtils.prepareCalendar(2017, Calendar.OCTOBER, 15).getTime(); //entry.getValue();
+                final String adSetRequest = String.format("adSetRequest%s", country);
+                final String adRequest = String.format("adRequest%s", country);
+                final Date startDate = adSetDateCalculator.calculate(date, createCampaignsQuery.getStartOffsetR(), createCampaignsQuery.getStartOffsetDays());
+                final Date endDate = adSetDateCalculator.calculate(date, createCampaignsQuery.getEndOffsetR(), createCampaignsQuery.getEndOffsetDays());
+
+                LOGGER.debug("Creating AdSet. country: {}, startDate: {}, endDate: {}", country, startDate, endDate);
+
                 Targeting targeting = marketingApiHelper.createTargeting(country, createCampaignsQuery.getAgeMin(), createCampaignsQuery.getAgeMax());
 
-                LOGGER.debug("Targeting Created: {}", targeting);
+                marketingApiHelper.createAdSetBatch(batchRequest, adSetRequest, account,
+                        String.format("AdSet %s-%s", campaignName, country), campaignRequest, pageId,
+                        AdSet.EnumOptimizationGoal.VALUE_PAGE_LIKES, AdSet.EnumBillingEvent.VALUE_IMPRESSIONS,
+                        createCampaignsQuery.getLifeTimeBudget(), targeting,
+                        String.valueOf(startDate.getTime() / 1000),
+                        String.valueOf(endDate.getTime() / 1000),
+                        AdSet.EnumStatus.VALUE_PAUSED);
 
-                try {
-                    AdSet adSet = marketingApiHelper.createAdSet(apiContext, adAccountId, campaign.getId(),
-                            String.format("AdSet %s-%s", campaignName, country), pageId,
-                            AdSet.EnumOptimizationGoal.VALUE_BRAND_AWARENESS, AdSet.EnumBillingEvent.VALUE_IMPRESSIONS,
-                            createCampaignsQuery.getLifeTimeBudget(), targeting,
-                            String.valueOf(adSetDateCalculator.calculate(date, createCampaignsQuery.getStartOffsetR(), createCampaignsQuery.getStartOffsetDays()).getTime()),
-                            String.valueOf(adSetDateCalculator.calculate(date, createCampaignsQuery.getEndOffsetR(), createCampaignsQuery.getEndOffsetDays()).getTime()),
-                            AdSet.EnumStatus.VALUE_PAUSED);
-
-                    LOGGER.debug("AdSet Created: {}", adSet);
-
-                    Ad ad = marketingApiHelper.createAd(apiContext, adAccountId,
-                            String.format("Ad %s-%s", campaignName, country), adSet.getId(), adCreative.getId(), Ad.EnumStatus.VALUE_PAUSED);
-
-                    LOGGER.debug("Ad Created: {}", ad);
-                } catch (APIException e) {
-                    LOGGER.error("Unable to create adSet", e);
-                }
+                marketingApiHelper.createAdBatch(batchRequest, adRequest, account,
+                        String.format("Ad %s-%s", campaignName, country), adSetRequest, adCreativeRequest,
+                        Ad.EnumStatus.VALUE_PAUSED);
             });
-        } catch (APIException e) {
+
+            List<APIResponse> responses = batchRequest.execute();
+            if (LOGGER.isDebugEnabled()) {
+                responses.stream().filter(it -> it != null).forEach(it -> LOGGER.debug("Response: {}", it.getRawResponse()));
+            }
+        } catch (Exception e) {
             LOGGER.error("Unable to create calendar campaign", e);
         }
     }

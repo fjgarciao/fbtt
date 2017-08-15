@@ -33,7 +33,7 @@ public class CampaignServiceTest {
         query.setEndOffsetDays(1);
         query.setAgeMin(18);
         query.setAgeMax(65);
-        query.setLifeTimeBudget(10000);
+        query.setLifeTimeBudget(700000);
 
         uit.createCalendarCampaign(query);
     }
