@@ -1,7 +1,8 @@
-package com.fjgarciao.fbtt.helper;
+package com.fjgarciao.fbtt.component;
 
 import com.fjgarciao.fbtt.util.CalendarUtils;
 import com.neovisionaries.i18n.CountryCode;
+import org.springframework.stereotype.Component;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -10,6 +11,7 @@ import java.util.Optional;
 /**
  * Source: https://en.wikipedia.org/wiki/Mother%27s_Day
  */
+@Component
 public class MothersDay implements MarketingDay {
 
     @Override
@@ -310,9 +312,9 @@ public class MothersDay implements MarketingDay {
             case TL: // Timor-Leste
                 c = CalendarUtils.prepareCalendar(year, Calendar.NOVEMBER, 3);
                 break;
-            case KP: // North Korea
-                c = CalendarUtils.prepareCalendar(year, Calendar.NOVEMBER, 16);
-                break;
+//          case KP: // North Korea: UNALLOWED
+//              c = CalendarUtils.prepareCalendar(year, Calendar.NOVEMBER, 16);
+//              break;
             case RU: // Russia
                 // Last Sunday of November
                 c = CalendarUtils.prepareCalendar(year);

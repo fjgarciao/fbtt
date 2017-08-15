@@ -1,4 +1,4 @@
-package com.fjgarciao.fbtt.helper;
+package com.fjgarciao.fbtt.component;
 
 import com.neovisionaries.i18n.CountryCode;
 

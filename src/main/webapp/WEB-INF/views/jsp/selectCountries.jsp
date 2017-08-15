@@ -20,7 +20,7 @@
 
 <body>
 
-    <form:form method="POST" action="/calendar/createCampaigns" modelAttribute="createCampaignsQuery">
+    <form:form method="POST" action="/calendar/createCampaign" modelAttribute="countrySelectionQuery">
         <form:errors path="*" cssClass="errorblock" element="div" />
 
         <p>

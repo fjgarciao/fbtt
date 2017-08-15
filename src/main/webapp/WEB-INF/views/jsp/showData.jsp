@@ -20,7 +20,13 @@
 
 <body>
 
-    <c:out value="${createCampaignsQuery}"/>
+    Create Campaign Query:
+    <c:out value="${createCampaignQuery}"/>
+
+    <br/>
+    
+    Country Selection Query:
+    <c:out value="${countrySelectionQuery}"/>
 
 </body>
 

@@ -1,4 +1,4 @@
-package com.fjgarciao.fbtt.helper;
+package com.fjgarciao.fbtt.component;
 
 import com.fjgarciao.fbtt.util.CalendarUtils;
 import org.junit.Assert;

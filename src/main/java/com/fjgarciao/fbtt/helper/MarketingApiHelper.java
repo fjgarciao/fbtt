@@ -92,14 +92,14 @@ public class MarketingApiHelper {
     }
 
     public void createAdSetBatch(BatchRequest batchRequest, String batchName,
-                                 AdAccount account, String name, String campaignBatchName,
+                                 AdAccount account, String name, String campaignId,
                                  String pageId, AdSet.EnumOptimizationGoal optimizationGoal,
                                  AdSet.EnumBillingEvent billingEvent, long lifeTimeBudget,
                                  Targeting targeting, String startTime, String endTime,
                                  AdSet.EnumStatus status) {
         account.createAdSet()
                 .setName(name)
-                .setCampaignId(String.format("{result=%s:$.id}", campaignBatchName))
+                .setCampaignId(campaignId)
                 .setPromotedObject("{\"page_id\": " + pageId + "}")
                 .setOptimizationGoal(optimizationGoal)
                 .setBillingEvent(billingEvent)
@@ -129,9 +129,13 @@ public class MarketingApiHelper {
                               String creativeId, Ad.EnumStatus status) {
         account.createAd()
                 .setName(name)
-                .setAdsetId(String.format("{result=%s:$.id}", adSetId))
-                .setCreative(String.format("{creative_id:{result=%s:$.id}}", creativeId))
+                .setAdsetId(adSetId)
+                .setCreative(creativeId)
                 .setStatus(status)
                 .addToBatch(batchRequest, batchName);
+    }
+
+    public APINodeList<Campaign> getCampaigns(AdAccount account) throws APIException {
+        return account.getCampaigns().requestAllFields().execute();
     }
 }
