@@ -2,6 +2,7 @@ package com.fjgarciao.fbtt.helper;
 
 import com.facebook.ads.sdk.*;
 import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import java.util.Arrays;
 
@@ -135,7 +136,53 @@ public class MarketingApiHelper {
                 .addToBatch(batchRequest, batchName);
     }
 
-    public APINodeList<Campaign> getCampaigns(AdAccount account) throws APIException {
-        return account.getCampaigns().requestAllFields().execute();
+    public Campaign getCampaign(APIContext apiContext, String campaignId, String... fields) throws APIException {
+        Campaign.APIRequestGet request = new Campaign(campaignId, apiContext).get();
+        if (StringUtils.isEmpty(fields)) {
+            request.requestAllFields();
+        } else {
+            request.requestFields(Arrays.asList(fields));
+        }
+        return request.execute();
+    }
+
+    public APINodeList<Campaign> getCampaigns(AdAccount account, String... fields) throws APIException {
+        AdAccount.APIRequestGetCampaigns request = account.getCampaigns();
+        if (StringUtils.isEmpty(fields)) {
+            request.requestAllFields();
+        } else {
+            request.requestFields(Arrays.asList(fields));
+        }
+        return request.execute();
+    }
+
+    public APINodeList<AdSet> getCampaignAdSets(APIContext apiContext, String campaignId, String... fields) throws APIException {
+        Campaign.APIRequestGetAdSets request = new Campaign(campaignId, apiContext).getAdSets();
+        if (StringUtils.isEmpty(fields)) {
+            request.requestAllFields();
+        } else {
+            request.requestFields(Arrays.asList(fields));
+        }
+        return request.execute();
+    }
+
+    public APINodeList<AdCreative> getCreatives(AdAccount account, String... fields) throws APIException {
+        AdAccount.APIRequestGetAdCreatives request = account.getAdCreatives();
+        if (StringUtils.isEmpty(fields)) {
+            request.requestAllFields();
+        } else {
+            request.requestFields(Arrays.asList(fields));
+        }
+        return request.execute();
+    }
+
+    public AdCreative getCreative(APIContext apiContext, String creativeId, String[] fields) throws APIException {
+        AdCreative.APIRequestGet request = new AdCreative(creativeId, apiContext).get();
+        if (StringUtils.isEmpty(fields)) {
+            request.requestAllFields();
+        } else {
+            request.requestFields(Arrays.asList(fields));
+        }
+        return request.execute();
     }
 }

@@ -1,18 +1,20 @@
 package com.fjgarciao.fbtt.service;
 
 import com.facebook.ads.sdk.*;
-import com.fjgarciao.fbtt.dto.CreateCampaignsQuery;
 import com.fjgarciao.fbtt.component.AdSetDateCalculator;
+import com.fjgarciao.fbtt.dto.CountrySelectionQuery;
+import com.fjgarciao.fbtt.dto.CreateCampaignQuery;
 import com.fjgarciao.fbtt.helper.MarketingApiHelper;
-import com.google.gson.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
-import java.util.*;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class CampaignService {
@@ -41,14 +43,15 @@ public class CampaignService {
         this.adSetDateCalculator = adSetDateCalculator;
     }
 
-    public Optional<String> createCalendarCampaign(CreateCampaignsQuery createCampaignsQuery) {
+    public Optional<String> createCalendarCampaign(CreateCampaignQuery createCampaignQuery,
+                                                   CountrySelectionQuery countrySelectionQuery) {
         APIContext apiContext = marketingApiHelper.createContext(accessToken, enableDebug);
         AdAccount account = new AdAccount(adAccountId, apiContext);
 
         try {
             BatchRequest batchRequest = new BatchRequest(apiContext);
 
-            String campaignName = createCampaignsQuery.getCampaignName();
+            String campaignName = createCampaignQuery.getCampaignName();
             Campaign campaign = marketingApiHelper.createCampaign(account, campaignName,
                     "AUCTION", Campaign.EnumObjective.VALUE_PAGE_LIKES, Campaign.EnumStatus.VALUE_PAUSED);
             String campaignId = campaign.getId();
@@ -59,24 +62,24 @@ public class CampaignService {
                     "Creative", pageId, "This is the title", "This is the body",
                     "http://www.facebookmarketingdevelopers.com/static/images/resource_1.jpg");
 
-            createCampaignsQuery.parseCountries().entrySet().stream().forEach(entry -> {
+            countrySelectionQuery.parseCountries().entrySet().stream().forEach(entry -> {
                 final String country = entry.getKey();
                 final Date date = entry.getValue();
                 final String adSetRequest = String.format("adSetRequest%s", country);
                 final String adSetId = String.format("{result=%s:$.id}", adSetRequest);
                 final String adRequest = String.format("adRequest%s", country);
 
-                final Date startDate = adSetDateCalculator.calculate(date, createCampaignsQuery.getStartOffsetR(), createCampaignsQuery.getStartOffsetDays());
-                final Date endDate = adSetDateCalculator.calculate(date, createCampaignsQuery.getEndOffsetR(), createCampaignsQuery.getEndOffsetDays());
+                final Date startDate = adSetDateCalculator.calculate(date, countrySelectionQuery.getStartOffsetR(), countrySelectionQuery.getStartOffsetDays());
+                final Date endDate = adSetDateCalculator.calculate(date, countrySelectionQuery.getEndOffsetR(), countrySelectionQuery.getEndOffsetDays());
 
                 LOGGER.debug("Creating AdSet. country: {}, startDate: {}, endDate: {}", country, startDate, endDate);
 
-                Targeting targeting = marketingApiHelper.createTargeting(country, createCampaignsQuery.getAgeMin(), createCampaignsQuery.getAgeMax());
+                Targeting targeting = marketingApiHelper.createTargeting(country, createCampaignQuery.getAgeMin(), createCampaignQuery.getAgeMax());
 
                 marketingApiHelper.createAdSetBatch(batchRequest, adSetRequest, account,
                         String.format("AdSet %s-%s", campaignName, country), campaignId, pageId,
                         AdSet.EnumOptimizationGoal.VALUE_PAGE_LIKES, AdSet.EnumBillingEvent.VALUE_IMPRESSIONS,
-                        createCampaignsQuery.getLifeTimeBudget(), targeting,
+                        createCampaignQuery.getLifeTimeBudget() * 100, targeting,
                         String.valueOf(startDate.getTime() / 1000),
                         String.valueOf(endDate.getTime() / 1000),
                         AdSet.EnumStatus.VALUE_PAUSED);
@@ -100,17 +103,12 @@ public class CampaignService {
         }
     }
 
-    public Optional<Campaign> getCampaignData(String campaignId, String... fields) {
+    public Optional<Campaign> getCampaign(String campaignId, String... fields) {
         APIContext apiContext = marketingApiHelper.createContext(accessToken, enableDebug);
 
         try {
-            Campaign.APIRequestGet request = new Campaign(campaignId, apiContext).get();
-            if (StringUtils.isEmpty(fields)) {
-                request.requestAllFields();
-            } else {
-                request.requestFields(Arrays.asList(fields));
-            }
-            return Optional.of(request.execute());
+            Campaign campaign = marketingApiHelper.getCampaign(apiContext, campaignId, fields);
+            return Optional.of(campaign);
         } catch (APIException e) {
             LOGGER.error("Unable to get campaign with id: {}", campaignId);
             return Optional.empty();
@@ -118,118 +116,47 @@ public class CampaignService {
     }
 
     public Optional<APINodeList<AdSet>> getCampaignAdSets(String campaignId, String... fields) {
-        Optional<Campaign> campaignOptional = getCampaignData(campaignId);
-        if (campaignOptional.isPresent()) {
-            Campaign campaign = campaignOptional.get();
+        APIContext apiContext = marketingApiHelper.createContext(accessToken, enableDebug);
 
-            try {
-                Campaign.APIRequestGetAdSets request = campaign.getAdSets();
-                if (StringUtils.isEmpty(fields)) {
-                    request.requestAllFields();
-                } else {
-                    request.requestFields(Arrays.asList(fields));
-                }
-                return Optional.of(request.execute());
-            } catch (APIException e) {
-                LOGGER.error("Unable to get ad sets from campaign {}", campaignId);
-            }
-        } else {
-            LOGGER.error("Unable to get campaign {}", campaignId);
+        try {
+            APINodeList<AdSet> adSets = marketingApiHelper.getCampaignAdSets(apiContext, campaignId, fields);
+            return Optional.of(adSets);
+        } catch (APIException e) {
+            LOGGER.error("Unable to get ad sets from campaign {}", campaignId);
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
-    /*
-    public void showCampaigns() {
+    public Optional<APINodeList<Campaign>> getCampaigns() {
         APIContext apiContext = marketingApiHelper.createContext(accessToken, enableDebug);
         AdAccount account = new AdAccount(adAccountId, apiContext);
 
         try {
-            APINodeList<Campaign> campaigns = account.getCampaigns().requestAllFields().execute();
-            campaigns.stream().forEach(campaign -> {
-                LOGGER.debug("Removing Campaign: {}", campaign);
-            });
-        } catch (Exception e) {
-            LOGGER.error("Unable to show campaigns", e);
+            APINodeList<Campaign> campaigns = marketingApiHelper.getCampaigns(account);
+            return Optional.of(campaigns);
+        } catch (APIException e) {
+            LOGGER.error("Unable to get campaigns", e);
+            return Optional.empty();
         }
     }
 
-    public void removeCampaigns() {
+    public int removeCampaigns() {
         APIContext apiContext = marketingApiHelper.createContext(accessToken, enableDebug);
         AdAccount account = new AdAccount(adAccountId, apiContext);
 
         try {
             BatchRequest batchRequest = new BatchRequest(apiContext);
 
-            APINodeList<Campaign> campaigns = account.getCampaigns().requestAllFields().execute();
+            APINodeList<Campaign> campaigns = marketingApiHelper.getCampaigns(account);
             campaigns.stream().forEach(campaign -> {
-                LOGGER.debug("Removing Campaign: {}", campaign);
                 campaign.delete().addToBatch(batchRequest);
             });
 
-            batchRequest.execute();
-        } catch (Exception e) {
+            return batchRequest.execute().size();
+        } catch (APIException e) {
             LOGGER.error("Unable to remove campaigns", e);
         }
-    }
-    */
 
-    public Campaign createCampaign() throws APIException {
-        APIContext context = new APIContext(accessToken).enableDebug(true);
-
-        Campaign campaign = new AdAccount(adAccountId, context).createCampaign()
-                .setName("My Campaign")
-                .setBuyingType("AUCTION")
-                .setObjective(Campaign.EnumObjective.VALUE_PAGE_LIKES)
-                .setStatus(Campaign.EnumStatus.VALUE_PAUSED)
-                .execute();
-        String campaign_id = campaign.getId();
-
-        AdSet adSet = new AdAccount(adAccountId, context).createAdSet()
-                .setName("My AdSet")
-                .setOptimizationGoal(AdSet.EnumOptimizationGoal.VALUE_PAGE_LIKES)
-                .setBillingEvent(AdSet.EnumBillingEvent.VALUE_IMPRESSIONS)
-                .setBidAmount(20L)
-                .setPromotedObject("{\"page_id\": " + pageId + "}")
-                .setDailyBudget(1000L)
-                .setCampaignId(campaign_id)
-                .setTargeting(
-                        new Targeting()
-                                .setFieldGeoLocations(
-                                        new TargetingGeoLocation()
-                                                .setFieldCountries(Arrays.asList("US"))
-                                )
-                )
-                .setStatus(AdSet.EnumStatus.VALUE_PAUSED)
-                .execute();
-        String ad_set_id = adSet.getId();
-
-        AdCreative creative = new AdAccount(adAccountId, context).createAdCreative()
-                .setName("My Creative")
-                .setObjectId(pageId)
-                .setTitle("My Page Like Ad")
-                .setBody("Like My Page")
-                .setImageUrl("http://www.facebookmarketingdevelopers.com/static/images/resource_1.jpg")
-                .execute();
-        String creative_id = creative.getId();
-
-        Ad ad = new AdAccount(adAccountId, context).createAd()
-                .setName("My Ad")
-                .setAdsetId(ad_set_id)
-                .setCreative(
-                        new AdCreative()
-                                .setFieldId(creative_id)
-                )
-                .setStatus(Ad.EnumStatus.VALUE_PAUSED)
-                .execute();
-        String ad_id = ad.getId();
-
-        APINodeList<AdPreview> adPreviews = new Ad(ad_id, context).getPreviews()
-                .setAdFormat(AdPreview.EnumAdFormat.VALUE_DESKTOP_FEED_STANDARD)
-                .execute();
-
-        adPreviews.forEach(ap -> LOGGER.debug(ap.getFieldBody()));
-
-        return campaign;
+        return 0;
     }
 }

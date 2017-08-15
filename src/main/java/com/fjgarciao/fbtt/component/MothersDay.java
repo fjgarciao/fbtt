@@ -312,7 +312,7 @@ public class MothersDay implements MarketingDay {
             case TL: // Timor-Leste
                 c = CalendarUtils.prepareCalendar(year, Calendar.NOVEMBER, 3);
                 break;
-//          case KP: // North Korea: UNALLOWED
+//          case KP: // North Korea: DISALLOWED
 //              c = CalendarUtils.prepareCalendar(year, Calendar.NOVEMBER, 16);
 //              break;
             case RU: // Russia

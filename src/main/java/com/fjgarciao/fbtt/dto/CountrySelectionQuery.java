@@ -4,7 +4,10 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 public class CountrySelectionQuery {
 
@@ -60,6 +63,12 @@ public class CountrySelectionQuery {
 
     public void setEndOffsetDays(int endOffsetDays) {
         this.endOffsetDays = endOffsetDays;
+    }
+
+    public Map<String, Date> parseCountries() {
+        return countries.stream()
+                .map(it -> it.split("\\|"))
+                .collect(Collectors.toMap(it -> it[0], it -> new Date(Long.parseLong(it[1]))));
     }
 
     @Override

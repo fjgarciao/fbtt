@@ -21,6 +21,11 @@ public class CreateCampaignQuery {
     @Max(65)
     private long ageMax;
 
+    // Budget
+    @NotNull
+    @Min(0)
+    private long lifeTimeBudget;
+
     // Marketing Day Values
     @NotNull
     @Size(min = 1)
@@ -34,6 +39,8 @@ public class CreateCampaignQuery {
     public CreateCampaignQuery() {
         Calendar c = Calendar.getInstance();
         this.year = c.get(Calendar.YEAR);
+        this.ageMin = 13;
+        this.ageMax = 65;
     }
 
     public String getCampaignName() {
@@ -60,6 +67,14 @@ public class CreateCampaignQuery {
         this.ageMax = ageMax;
     }
 
+    public long getLifeTimeBudget() {
+        return lifeTimeBudget;
+    }
+
+    public void setLifeTimeBudget(long lifeTimeBudget) {
+        this.lifeTimeBudget = lifeTimeBudget;
+    }
+
     public String getMarketingDay() {
         return marketingDay;
     }
@@ -78,10 +93,11 @@ public class CreateCampaignQuery {
 
     @Override
     public String toString() {
-        return "SelectMarketingDayQuery{" +
+        return "CreateCampaignQuery{" +
                 "campaignName='" + campaignName + '\'' +
                 ", ageMin=" + ageMin +
                 ", ageMax=" + ageMax +
+                ", lifeTimeBudget=" + lifeTimeBudget +
                 ", marketingDay='" + marketingDay + '\'' +
                 ", year=" + year +
                 '}';

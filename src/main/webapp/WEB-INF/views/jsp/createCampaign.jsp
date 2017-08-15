@@ -2,7 +2,6 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="my" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <%@ taglib prefix="script" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
@@ -10,13 +9,6 @@
 
 <head>
     <title><spring:message code="index.title"/> - <spring:message code="calendar.campaignValues"/></title>
-
-    <%--
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    --%>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 </head>
 
 <body>
@@ -31,15 +23,23 @@
 
         <h3><spring:message code="calendar.segmentation"/></h3>
 
-        <form:label path="minAge">
-            <spring:message code="calendar.minAge"/>:
+        <form:label path="ageMin">
+            <spring:message code="calendar.ageMin"/>:
         </form:label>
-        <form:input path="minAge" size="2"/>
+        <form:input path="ageMin" size="2"/>
 
-        <form:label path="maxAge">
-            <spring:message code="calendar.maxAge"/>:
+        <form:label path="ageMax">
+            <spring:message code="calendar.ageMax"/>:
         </form:label>
-        <form:input path="maxAge" size="2"/>
+        <form:input path="ageMax" size="2"/>
+
+        <h3><spring:message code="calendar.budget"/></h3>
+
+        <form:label path="lifeTimeBudget">
+            <spring:message code="calendar.lifeTimeBudget"/>:
+        </form:label>
+        <form:input path="lifeTimeBudget" size="7"/>
+        <spring:message code="calendar.lifeTimeBudget.noCents"/>
 
         <h3><spring:message code="calendar.marketingDayValues"/></h3>
 
@@ -57,8 +57,12 @@
         <form:input path="year" size="4"/>
         <br/>
 
-        <input type="submit" name="submit" class="button" value="<spring:message code="calendar.chooseCountries"/>" />
+        <p>
+            <input type="submit" name="submit" class="button" value="<spring:message code="calendar.chooseCountries"/>" />
+        </p>
     </form:form>
+
+    <jsp:include page="bottom.jsp"/>
 </body>
 
 </html>

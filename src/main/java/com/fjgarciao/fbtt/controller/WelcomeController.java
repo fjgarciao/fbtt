@@ -8,14 +8,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.http.HttpSession;
+
 @Controller
 @RequestMapping("/")
 public class WelcomeController {
     private static final Logger LOGGER = LoggerFactory.getLogger(WelcomeController.class);
 
     @RequestMapping(method = RequestMethod.GET)
-    public String index() {
+    public String index(HttpSession session) {
         LOGGER.debug("index() is executed!");
+        session.invalidate();
         return "redirect:/calendar";
     }
 }

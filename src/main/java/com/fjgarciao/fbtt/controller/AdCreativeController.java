@@ -1,11 +1,12 @@
 package com.fjgarciao.fbtt.controller;
 
 import com.facebook.ads.sdk.APINodeList;
+import com.facebook.ads.sdk.AdCreative;
 import com.facebook.ads.sdk.Campaign;
 import com.fjgarciao.fbtt.service.CampaignService;
+import com.fjgarciao.fbtt.service.CreativeService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,23 +20,23 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import java.util.Optional;
 
 @Controller
-@RequestMapping("/campaigns")
-public class CampaignController {
+@RequestMapping("/creatives")
+public class AdCreativeController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(CampaignController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdCreativeController.class);
 
-    private CampaignService campaignService;
+    private CreativeService creativeService;
 
     @Autowired
-    public CampaignController(CampaignService campaignService) {
-        this.campaignService = campaignService;
+    public AdCreativeController(CreativeService creativeService) {
+        this.creativeService = creativeService;
     }
 
     @RequestMapping(value = "/remove", method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
     public @ResponseBody int remove() {
-        LOGGER.debug("CampaignController.remove");
+        LOGGER.debug("AdCreativeController.remove");
 
-        return campaignService.removeCampaigns();
+        return creativeService.removeCreatives();
     }
 
     @RequestMapping(method = RequestMethod.GET, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -43,9 +44,9 @@ public class CampaignController {
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
         JsonParser parser = new JsonParser();
 
-        Optional<APINodeList<Campaign>> campaignsOptional = campaignService.getCampaigns();
-        if (campaignsOptional.isPresent()) {
-            return gson.toJson(parser.parse(campaignsOptional.get().getRawResponse()));
+        Optional<APINodeList<AdCreative>> creativesOptional = creativeService.getCreatives();
+        if (creativesOptional.isPresent()) {
+            return gson.toJson(parser.parse(creativesOptional.get().getRawResponse()));
         } else {
             return "{}";
         }

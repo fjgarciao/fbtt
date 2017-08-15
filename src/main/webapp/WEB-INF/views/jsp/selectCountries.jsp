@@ -2,44 +2,61 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
-<%@ taglib prefix="my" tagdir="/WEB-INF/tags" %>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
-    <title><spring:message code="index.title"/></title>
-
-    <%--
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-    --%>
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <title><spring:message code="index.title"/> - <spring:message code="calendar.chooseCountries"/></title>
 </head>
 
 <body>
 
     <form:form method="POST" action="/calendar/createCampaign" modelAttribute="countrySelectionQuery">
-        <form:errors path="*" cssClass="errorblock" element="div" />
+
+        <h2><spring:message code="calendar.campaignValues"/></h2>
 
         <p>
             <label>
+                <spring:message code="calendar.campaignName"/>
+            </label>
+            <input value="<c:out value="${createCampaignQuery.campaignName}"/>" size="30" readonly/>
+
+            <h3><spring:message code="calendar.segmentation"/></h3>
+
+            <label>
+                <spring:message code="calendar.ageMin"/>:
+            </label>
+            <input value="<c:out value="${createCampaignQuery.ageMin}"/>" size="2" readonly/>
+
+            <label>
+                <spring:message code="calendar.ageMax"/>:
+            </label>
+            <input value="<c:out value="${createCampaignQuery.ageMax}"/>" size="2" readonly/>
+
+            <h3><spring:message code="calendar.budget"/></h3>
+
+            <label>
+                <spring:message code="calendar.lifeTimeBudget"/>:
+            </label>
+            <input value="<c:out value="${createCampaignQuery.lifeTimeBudget}"/>" size="7" readonly/>
+            <spring:message code="calendar.lifeTimeBudget.noCents"/>
+
+            <h3><spring:message code="calendar.marketingDayValues"/></h3>
+
+            <label>
                 <spring:message code="calendar.marketingDay"/>:
             </label>
-            <input value="<c:out value="${selectMarketingDayQuery.marketingDay}"/>" size="20" readonly/>
+            <input value="<c:out value="${createCampaignQuery.marketingDay}"/>" size="20" readonly/>
 
             <label>
                 <spring:message code="calendar.year"/>:
             </label>
-            <input value="<c:out value="${selectMarketingDayQuery.year}"/>" size="4" readonly/>
+            <input value="<c:out value="${createCampaignQuery.year}"/>" size="4" readonly/>
         </p>
 
-        <p>
-            <label>
-                <spring:message code="calendar.chooseCountries"/>:
-            </label>
-        </p>
+        <h2><spring:message code="calendar.chooseCountries"/></h2>
+
         <p>
             <form:label path="countries">
                 <spring:message code="calendar.countries"/>:
@@ -73,11 +90,14 @@
             </form:label>
             <form:input path="endOffsetDays" size="3" value="0"/>
             <br/>
+        </p>
 
-            <input type="submit" name="submit" class="button" value="<spring:message code="calendar.createCampaigns"/>"/>
+        <p>
+            <input type="submit" name="submit" class="button" value="<spring:message code="calendar.createCampaign"/>"/>
         </p>
     </form:form>
 
+    <jsp:include page="bottom.jsp"/>
 </body>
 
 </html>

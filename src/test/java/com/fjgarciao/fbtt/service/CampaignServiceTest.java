@@ -1,10 +1,12 @@
 package com.fjgarciao.fbtt.service;
 
 import com.facebook.ads.sdk.APIException;
-import com.facebook.ads.sdk.APINodeList;
-import com.facebook.ads.sdk.AdSet;
-import com.facebook.ads.sdk.Campaign;
-import com.fjgarciao.fbtt.dto.CreateCampaignsQuery;
+import com.fjgarciao.fbtt.dto.CountrySelectionQuery;
+import com.fjgarciao.fbtt.dto.CreateCampaignQuery;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -14,42 +16,43 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Arrays;
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest()
 public class CampaignServiceTest {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(CampaignServiceTest.class);
+    private static final Gson gson = new GsonBuilder().setPrettyPrinting().create();
+    private static final JsonParser parser = new JsonParser();
 
     @Autowired
     private CampaignService uit;
 
     @Test
-    public void testCreateCampaign() throws APIException {
-        uit.createCampaign();
-    }
-
-    @Test
     public void testCreateCalendarCampaign() {
-        CreateCampaignsQuery query = new CreateCampaignsQuery();
-        query.setCampaignName("Test Campaign");
-        query.setCountries(Arrays.asList("AR|1508018400000", "BY|1507932000000", "ID|1513897200000", "MW|1507500000000", "PA|1512687600000", "RU|1511650800000", "TL|1509663600000"));
-        query.setStartOffsetR(0);
-        query.setStartOffsetDays(7);
-        query.setEndOffsetDays(0);
-        query.setEndOffsetDays(1);
-        query.setAgeMin(18);
-        query.setAgeMax(65);
-        query.setLifeTimeBudget(700000);
+        CreateCampaignQuery createCampaignQuery = new CreateCampaignQuery();
+        createCampaignQuery.setCampaignName("Test Campaign");
+        createCampaignQuery.setAgeMin(18);
+        createCampaignQuery.setAgeMax(65);
+        createCampaignQuery.setLifeTimeBudget(700000);
 
-        uit.createCalendarCampaign(query).ifPresent(campaignId -> {
+        CountrySelectionQuery countrySelectionQuery = new CountrySelectionQuery();
+        countrySelectionQuery.setCountries(Arrays.asList("AR|1508018400000", "BY|1507932000000", "ID|1513897200000", "MW|1507500000000", "PA|1512687600000", "RU|1511650800000", "TL|1509663600000"));
+        countrySelectionQuery.setStartOffsetR(0);
+        countrySelectionQuery.setStartOffsetDays(7);
+        countrySelectionQuery.setEndOffsetDays(0);
+        countrySelectionQuery.setEndOffsetDays(1);
+
+        uit.createCalendarCampaign(createCampaignQuery, countrySelectionQuery).ifPresent(campaignId -> {
             final String[] campaignFields = {"id", "name", "configured_status", "created_time", "objective", "start_time", "stop_time"};
-            uit.getCampaignData(campaignId, campaignFields).ifPresent(campaign -> {
-                LOGGER.debug("Generated Campaign: {}", campaign);
+            uit.getCampaign(campaignId, campaignFields).ifPresent(campaign -> {
+                LOGGER.info("Generated Campaign: {}", gson.toJson(parser.parse(campaign.getRawValue())));
                 final String[] adSetFields = {"id", "name", "optimization_goal", "promoted_object", "billing_event", "campaign_id", "configured_status", "created_time", "start_time", "end_time", "lifetime_budget", "targeting"};
-                uit.getCampaignAdSets(campaign.getId(), adSetFields).ifPresent(list -> {
-                    list.stream().forEach(adSet -> LOGGER.debug("AdSet: {}", adSet));
+                uit.getCampaignAdSets(campaign.getId(), adSetFields).ifPresent(adSets -> {
+                    List<JsonElement> elements = adSets.stream().map(adSet -> parser.parse(adSet.getRawValue())).collect(Collectors.toList());
+                    LOGGER.info("AdSets: {}", gson.toJson(elements));
                 });
             });
         });

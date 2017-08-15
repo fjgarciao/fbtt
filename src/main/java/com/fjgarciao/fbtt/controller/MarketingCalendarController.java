@@ -1,11 +1,15 @@
 package com.fjgarciao.fbtt.controller;
 
-import com.fjgarciao.fbtt.dto.CreateCampaignQuery;
-import com.fjgarciao.fbtt.dto.CountrySelectionQuery;
 import com.fjgarciao.fbtt.component.MarketingCalendar;
 import com.fjgarciao.fbtt.component.MarketingDay;
 import com.fjgarciao.fbtt.component.MarketingDayFactory;
+import com.fjgarciao.fbtt.dto.CountrySelectionQuery;
+import com.fjgarciao.fbtt.dto.CreateCampaignQuery;
 import com.fjgarciao.fbtt.service.CampaignService;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 import com.neovisionaries.i18n.CountryCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +26,11 @@ import javax.validation.Valid;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/calendar")
+@SessionAttributes("createCampaignQuery")
 public class MarketingCalendarController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MarketingCalendarController.class);
@@ -41,9 +47,13 @@ public class MarketingCalendarController {
         this.campaignService = campaignService;
     }
 
+    @ModelAttribute("createCampaignQuery")
+    public CreateCampaignQuery createCampaignQuery() {
+        return new CreateCampaignQuery();
+    }
+
     @RequestMapping(method = RequestMethod.GET)
-    public String initializeForm(@ModelAttribute("createCampaignQuery") CreateCampaignQuery createCampaignQuery,
-                                 ModelMap model) {
+    public String initializeForm(ModelMap model) {
         LOGGER.debug("MarketingCalendarController.initializeForm");
 
         List<MarketingDay> allMarketingDays = marketingDayFactory.getAllMarketingDays();
@@ -55,7 +65,6 @@ public class MarketingCalendarController {
     @RequestMapping(value = "/selectCountries", method = RequestMethod.POST)
     public String selectCountries(@Valid CreateCampaignQuery createCampaignQuery,
                                   @ModelAttribute("countrySelectionQuery") CountrySelectionQuery countrySelectionQuery,
-                                  BindingResult result,
                                   ModelMap model) {
         LOGGER.debug("MarketingCalendarController.selectCountries. Query: {}", createCampaignQuery);
 
@@ -68,19 +77,29 @@ public class MarketingCalendarController {
 
     @RequestMapping(value = "/createCampaign", method = RequestMethod.POST)
     public String createCampaign(@Valid CountrySelectionQuery countrySelectionQuery,
-                                  @ModelAttribute("createCampaignQuery") CreateCampaignQuery createCampaignQuery,
-                                  BindingResult result, ModelMap model) {
-        LOGGER.debug("MarketingCalendarController.createCampaign. Query: {}", createCampaignQuery);
+                                 @ModelAttribute("createCampaignQuery") CreateCampaignQuery createCampaignQuery,
+                                 BindingResult result, ModelMap model) {
+        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        JsonParser parser = new JsonParser();
         LOGGER.debug("MarketingCalendarController.createCampaign. Query: {}", countrySelectionQuery);
 
-        //campaignService.createCalendarCampaign()
-        /*
-        MarketingDay marketingDay = marketingDayFactory.getMarketingDayByName(countrySelectionQuery.getMarketingDay()).get();
-        Map<CountryCode, Date> calendarData = marketingCalendar.getValuesFromMarketingDay(marketingDay, 2017);
-        model.addAttribute("calendarData", calendarData);
-        */
+        campaignService.createCalendarCampaign(createCampaignQuery, countrySelectionQuery).ifPresent(campaignId -> {
+            final String[] campaignFields = {"id", "name", "configured_status", "created_time", "objective", "start_time", "stop_time"};
+            campaignService.getCampaign(campaignId, campaignFields).ifPresent(campaign -> {
+                String campaignJson = gson.toJson(parser.parse(campaign.getRawValue()));
+                LOGGER.info("Generated Campaign: {}", campaignJson);
+                model.addAttribute("campaignData", campaignJson);
 
-        //model.addAttribute("countrySelectionQuery", countrySelectionQuery);
-        return "showData";
+                final String[] adSetFields = {"id", "name", "optimization_goal", "promoted_object", "billing_event", "campaign_id", "configured_status", "created_time", "start_time", "end_time", "lifetime_budget", "targeting"};
+                campaignService.getCampaignAdSets(campaign.getId(), adSetFields).ifPresent(list -> {
+                    List<JsonElement> adSets = list.stream().map(adSet -> parser.parse(adSet.getRawValue())).collect(Collectors.toList());
+                    String adSetsJson = gson.toJson(adSets);
+                    LOGGER.info("Generated Ad Sets: {}", adSetsJson);
+                    model.addAttribute("adSets", adSetsJson);
+                });
+            });
+        });
+
+        return "showResults";
     }
 }
