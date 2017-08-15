@@ -69,7 +69,7 @@ public class MarketingCalendarController {
         LOGGER.debug("MarketingCalendarController.selectCountries. Query: {}", createCampaignQuery);
 
         MarketingDay marketingDay = marketingDayFactory.getMarketingDayByName(createCampaignQuery.getMarketingDay()).get();
-        Map<CountryCode, Date> countriesData = marketingCalendar.getValuesFromMarketingDay(marketingDay, createCampaignQuery.getYear());
+        Map<CountryCode, Date> countriesData = marketingCalendar.getValuesFromMarketingDay(marketingDay, createCampaignQuery.getYear(), false);
         model.addAttribute("countriesData", countriesData);
 
         return "selectCountries";

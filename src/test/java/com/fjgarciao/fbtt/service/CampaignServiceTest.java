@@ -1,12 +1,12 @@
 package com.fjgarciao.fbtt.service;
 
-import com.facebook.ads.sdk.APIException;
 import com.fjgarciao.fbtt.dto.CountrySelectionQuery;
 import com.fjgarciao.fbtt.dto.CreateCampaignQuery;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
@@ -19,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Ignore
 @RunWith(SpringRunner.class)
 @SpringBootTest()
 public class CampaignServiceTest {
